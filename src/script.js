@@ -1,12 +1,12 @@
-function formateDate(timestamp){
-    let date =new Date(timestamp);
-    let hours= date.getHours();
-    if (hours < 10) {
-        hours ='0${hours}';
-}
-let minutes = date.getMinutes();
+function formateDate(timestamp) {
+  let date = new Date(timestamp);
+  let hours = date.getHours();
+  if (hours < 10) {
+    hours = "0${hours}";
+  }
+  let minutes = date.getMinutes();
   if (minutes < 10) {
-    minutes = '0${mintues}';
+    minutes = "0${mintues}";
   }
   let days = [
     "Sunday",
@@ -22,56 +22,58 @@ let minutes = date.getMinutes();
   return "${day} ${hours}:${minutes}";
 }
 
-function formatDay(timestamp){
-    let date = new Date(timestamp * 1000);
-    let day = date.getDay();
-    let days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function formatDay(timestamp) {
+  let date = new Date(timestamp * 1000);
+  let day = date.getDay();
+  let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    return days[day];
-
+  return days[day];
 }
 
 function displayCast(response) {
- let cast = response.data.daily;
+  let forecast = response.data.daily;
 
- let castElement = document.querySelector("#cast");
+  let forecastElement = document.querySelector("#cast");
+  let forecastHTML = `<div class="row">`;
+  forecast.forEach(function (forecastDay, index) {
+    console.log(forecastDay);
+    if (index < 6) {
+      forecastHTML =
+        forecastHTML +
+        `
+      <div class="col-2">
+        <div class="weather-forecast-date">${formatDay(forecastDay.dt)}</div>
+        <img
+          src="${forecastDay.condition.icon_url}"
+          alt=""
+          width="42"
+        />
+        <div class="weather-forecast-temperatures">
+          <span class="weather-forecast-temperature-max"> ${Math.round(
+            forecastDay.temperature.maximum
+          )}° </span>
+          <span class="weather-forecast-temperature-min"> ${Math.round(
+            forecastDay.temperature.minimum
+          )}° </span>
+        </div>
+      </div>
+  `;
+    }
+  });
 
-let days=["Thu","Fri","Sat","Sun"];
-
- let castHTML = '<div class="row">';
- days.forEach(function(castDay, index) {
-if (index<6){ 
- castHTML=
-  castHTML+
- '
-<div class="col-2">
-    <div class="forcast-date">${formatDay
-        (castDay.dt)}</div>
-        ${index}
-    <img 
-    src="http://shecodes-assets.s3.amazonaws.com/api/weather/icons/scattered-clouds-day.png";
-     alt="" 
-     width="42" 
-     />
-    <div class="forcast-temperature">
-      <span class="forcast-temperature-max">${Math.round (castDay.temp.max)}° </span>
-      <span class="forcast-temperature-min">${Math.round(castDay.temp.min)}° </span>
-    </div>
-  </div>
-';
-   }
-});
-castHTML= castHTML+'</div>';
-castElement.innerHTML=castHTML;
- 
+  forecastHTML = forecastHTML + `</div>`;
+  forecastElement.innerHTML = forecastHTML;
 }
 function getCast(coordinates) {
-let apiKey = "e7846e44c0bd21b19tc86a51o0fef236";
-let apiUrl ='https://api.shecodes.io/weather/v1/current?lat=38.71667&lon=-9.13333&key=e7846e44c0bd21b19tc86a51o0fef236&units=metric';
- axios.get(apiUrl).then(displayCast);
+  let lat = coordinates.lat;
+  let lon = coordinates.lon;
+  let apiKey = "bd79ao40tde3dec118ca46bc3e6dd55f";
+  let apiUrl = `https://api.shecodes.io/weather/v1/forecast?lon=${lon}&lat=${lat}&key=${apiKey}`;
+  axios.get(apiUrl).then(displayCast);
 }
 
 function displayTemperature(response) {
+  console.log(response.data);
   let temperatureElement = document.querySelector("#temperature");
   let cityElement = document.querySelector("#city");
   let descriptionElement = document.querySelector("#description");
@@ -80,28 +82,25 @@ function displayTemperature(response) {
   let gdateElement = document.querySelector("#gdate");
   let iconElement = document.querySelector("#icon");
 
-  displayCast();
-
   celsiusTemperature = response.data.main.temp;
 
   temperatureElement.innerHTML = Math.round(response.data.main.temp);
   cityElement.innerHTML = response.data.name;
   descriptionElement.innerHTML = response.data.weather[0].description;
   moistElement.innerHTML = response.data.main.moist;
-  airElement.innerHTML = Math.round(response.data.air.speed * 3.6);
+  airElement.innerHTML = Math.round(response.data.wind.speed * 3.6);
   gdateElement.innerHTML = formateDate(response.data.dt * 1000);
   iconElement.setAttribute(
     "src",
-    "http://shecodes-assets.s3.amazonaws.com/api/weather/icons/scattered-clouds-day.png",
+    "http://shecodes-assets.s3.amazonaws.com/api/weather/icons/scattered-clouds-day.png"
   );
   iconElement.setAttribute("alt", response.data.weather[0].description);
-   
+  console.log(response.data.coord);
   getCast(response.data.coord);
 }
 function search(city) {
-  let apiKey = "e7846e44c0bd21b19tc86a51o0fef236";
-  let apiUrl ='https://api.shecodes.io/weather/v1/current?query=Lisbon&key=e7846e44c0bd21b19tc86a51o0fef236&units=metric';
-;
+  let apiKey = "50c2acd53349fabd54f52b93c8650d37";
+  let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
   axios.get(apiUrl).then(displayTemperature);
 }
 
